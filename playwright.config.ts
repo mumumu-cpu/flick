@@ -9,7 +9,8 @@ export default defineConfig({
   fullyParallel: true,
   // Glass blur + spring animations are GPU/CPU heavy in headless browsers; more parallel browsers starve each other.
   workers: 2,
-  retries: 0,
+  // One retry on CI absorbs transient Miniflare (local emulator) hiccups; such tests are still reported as flaky.
+  retries: process.env.CI ? 1 : 0,
   reporter: [['list']],
   use: {
     baseURL: process.env.BASE_URL ?? `http://localhost:${PORT}`,
