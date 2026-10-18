@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npx oxlint
+      - run: npx playwright install --with-deps chromium webkit
+      - run: printf 'DEV_LOGIN=1\nAI_MOCK=1\nGOOGLE_CLIENT_ID=dev\nGOOGLE_CLIENT_SECRET=dev\n' > .dev.vars
+      - run: npx wrangler d1 migrations apply DB --local
+      - run: npx playwright test
