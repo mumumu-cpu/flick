@@ -35,10 +35,11 @@ async function runJson<T>(env: AppEnv['Bindings'], system: string, user: string,
     response_format: { type: 'json_schema', json_schema: schema },
     max_tokens: 600,
     temperature: 0.3,
-  } as never)) as { response?: unknown }
-  const r = out.response
+  } as never)) as { response?: unknown; choices?: { message?: { content?: unknown } }[] }
+  // Models answer either as { response } or in the OpenAI chat.completion shape.
+  const r = out.response ?? out.choices?.[0]?.message?.content
   if (r && typeof r === 'object') return r as T
-  const s = String(r ?? '')
+  const s = String(r ?? '').replace(/<think>[\s\S]*?<\/think>/g, '')
   const m = s.match(/\{[\s\S]*\}/)
   return JSON.parse(m ? m[0] : s) as T
 }
