@@ -21,7 +21,10 @@ export async function swipe(page: Page, text: string, dx: number) {
     b = n
   }
   const y = b.y + b.height / 2
-  const x0 = b.x + b.width / 2
+  // Start on the side opposite the swipe so the finger stays on screen, as a real thumb would.
+  const x0 = dx > 0 ? b.x + 30 : b.x + b.width - 30
+  const vw = page.viewportSize()!.width
+  dx = Math.max(-x0 + 2, Math.min(vw - 2 - x0, dx))
   await page.mouse.move(x0, y)
   await page.mouse.down()
   const steps = 12
