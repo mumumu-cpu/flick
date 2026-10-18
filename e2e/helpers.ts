@@ -12,7 +12,8 @@ export async function swipe(page: Page, text: string, dx: number) {
   // Wait out tab-switch exit animations so only the live card matches.
   await expect(page.getByTestId('task').filter({ hasText: text })).toHaveCount(1)
   const card = page.getByTestId('task').filter({ hasText: text }).locator('[role=button]')
-  // WebKit ignores a drag that begins during the card's enter animation, so wait for it to finish.
+  // WebKit ignores a drag that begins while the card (or the tab pane around it) is still animating.
+  await expect(page.locator('[data-testid=pane][data-settled=true]')).toHaveCount(1)
   await expect(page.getByTestId('task').filter({ hasText: text })).toHaveAttribute('data-entered', 'true')
   const b = (await card.boundingBox())!
   const y = b.y + b.height / 2

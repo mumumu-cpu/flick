@@ -85,6 +85,8 @@ export const TaskCard = forwardRef<HTMLLIElement, Props>(function TaskCard({ tas
       className="relative mb-2.5 list-none"
       onAnimationStart={() => setEntered(false)}
       onAnimationComplete={() => setEntered(true)}
+      onLayoutAnimationStart={() => setEntered(false)}
+      onLayoutAnimationComplete={() => setEntered(true)}
       data-testid="task"
       data-status={task.status}
       data-entered={entered}
