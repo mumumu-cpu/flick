@@ -40,7 +40,6 @@ export default function App() {
   )
   const [busyScreen, setBusyScreen] = useState(() => new URLSearchParams(location.search).get('auth') === 'ok')
   const [isFs, setIsFs] = useState(false)
-  const [paneSettled, setPaneSettled] = useState(true)
 
   const setTab = useCallback((s: Status) => {
     setTabState((prev) => {
@@ -218,10 +217,6 @@ export default function App() {
               animate="center"
               exit="exit"
               transition={{ type: 'spring', stiffness: 380, damping: 36 }}
-              onAnimationStart={() => setPaneSettled(false)}
-              onAnimationComplete={() => setPaneSettled(true)}
-              data-testid="pane"
-              data-settled={paneSettled}
             >
               {showSkeleton ? (
                 <SkeletonList />
