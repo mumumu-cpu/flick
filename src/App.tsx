@@ -53,6 +53,7 @@ export default function App() {
     }
   }, [])
 
+  const dismissToast = useCallback(() => setToast(null), [])
   const notify = useCallback((text: string, undo?: () => void) => setToast({ id: Date.now() + Math.random(), text, undo }), [])
 
   useEffect(() => {
@@ -282,7 +283,7 @@ export default function App() {
         }}
       />
 
-      <Toast toast={toast} onDone={() => setToast(null)} />
+      <Toast toast={toast} onDone={dismissToast} />
       <FullscreenLoader show={busyScreen} />
     </LayoutGroup>
   )

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { IconUndo } from './icons'
 
 export interface ToastData {
@@ -8,12 +8,16 @@ export interface ToastData {
   undo?: () => void
 }
 
+const DURATION = 6000
+
 export function Toast({ toast, onDone }: { toast: ToastData | null; onDone: () => void }) {
+  // The countdown pauses while a finger or pointer rests on the toast.
+  const [held, setHeld] = useState(false)
   useEffect(() => {
-    if (!toast) return
-    const t = setTimeout(onDone, 4000)
+    if (!toast || held) return
+    const t = setTimeout(onDone, DURATION)
     return () => clearTimeout(t)
-  }, [toast, onDone])
+  }, [toast, held, onDone])
   return (
     <div className="pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4" style={{ bottom: 'calc(var(--safe-b) + 96px)' }}>
       <AnimatePresence mode="popLayout">
@@ -22,6 +26,8 @@ export function Toast({ toast, onDone }: { toast: ToastData | null; onDone: () =
             key={toast.id}
             role="status"
             data-testid="toast"
+            onPointerEnter={() => setHeld(true)}
+            onPointerLeave={() => setHeld(false)}
             className="pointer-events-auto flex items-center gap-3 rounded-full py-2 pr-2 pl-4 text-[14px] text-white"
             style={{ background: 'rgba(18,20,28,.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 10px 30px -10px rgba(0,0,0,.4)' }}
             initial={{ y: 30, opacity: 0, scale: 0.9, filter: 'blur(6px)' }}
