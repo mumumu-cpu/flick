@@ -7,6 +7,8 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 7_000 },
   fullyParallel: true,
+  // Remote runs: fewer parallel browsers so local CPU contention doesn't masquerade as slowness.
+  workers: process.env.BASE_URL ? 2 : undefined,
   retries: 0,
   reporter: [['list']],
   use: {

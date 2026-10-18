@@ -2,6 +2,8 @@
 
 開いた瞬間にメモできる、フリックでステータスを動かすタスク管理ウェブアプリ。
 
+**https://flick.mumumu-cpu.workers.dev**
+
 - モバイルファースト / PWA（ホーム画面に追加で全画面表示）
 - JS 読み込み前からメモ欄が使える起動シェル
 - 右フリックで進める（未着手 → 進行中 → 完了）、左フリックで戻す。端は削除。すべて「元に戻す」可
@@ -51,3 +53,9 @@ Google Cloud Console の OAuth クライアント（ウェブアプリ）に、�
 ## License
 
 MIT
+
+本番に対して E2E を流す（テスト用ログインが要るケースは除外）:
+
+```bash
+BASE_URL=https://flick.mumumu-cpu.workers.dev npx playwright test --grep-invert "ログイン後|ログアウトで|他人のタスク"
+```
