@@ -12,8 +12,14 @@ export async function swipe(page: Page, text: string, dx: number) {
   // Wait out tab-switch exit animations so only the live card matches.
   await expect(page.getByTestId('task').filter({ hasText: text })).toHaveCount(1)
   const card = page.getByTestId('task').filter({ hasText: text }).locator('[role=button]')
-  await page.waitForTimeout(150)
-  const b = (await card.boundingBox())!
+  // Let the enter / layout animation settle so the press lands on a card that isn't still moving.
+  let b = (await card.boundingBox())!
+  for (let stable = 0; stable < 3; ) {
+    await page.waitForTimeout(60)
+    const n = (await card.boundingBox())!
+    stable = Math.abs(n.x - b.x) < 0.5 && Math.abs(n.y - b.y) < 0.5 && Math.abs(n.width - b.width) < 0.5 ? stable + 1 : 0
+    b = n
+  }
   const y = b.y + b.height / 2
   const x0 = b.x + b.width / 2
   await page.mouse.move(x0, y)
