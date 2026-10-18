@@ -19,7 +19,10 @@ export async function swipe(page: Page, text: string, dx: number) {
   await page.mouse.move(x0, y)
   await page.mouse.down()
   const steps = 12
-  for (let i = 1; i <= steps; i++) await page.mouse.move(x0 + (dx * i) / steps, y + i * 0.3)
+  for (let i = 1; i <= steps; i++) {
+    await page.mouse.move(x0 + (dx * i) / steps, y + i * 0.3)
+    await page.waitForTimeout(16) // one frame per step, like a real finger
+  }
   await page.mouse.up()
 }
 

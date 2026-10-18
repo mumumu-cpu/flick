@@ -254,7 +254,8 @@ test.describe('画面', () => {
   test('横スクロールが発生せず、コンソールエラーが無い', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (e) => errors.push(e.message))
-    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
+    // Ignore the browser's own notes about viewport meta keys it doesn't know (e.g. Linux WebKit and interactive-widget).
+    page.on('console', (m) => m.type() === 'error' && !m.text().startsWith('Viewport argument') && errors.push(m.text()))
     await page.goto('/')
     await addMemo(page, 'とても長いタスク名'.repeat(20))
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)

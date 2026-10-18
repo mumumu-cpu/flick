@@ -7,8 +7,8 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 7_000 },
   fullyParallel: true,
-  // Remote runs: fewer parallel browsers so local CPU contention doesn't masquerade as slowness.
-  workers: process.env.BASE_URL ? 2 : undefined,
+  // Glass blur + spring animations are GPU/CPU heavy in headless browsers; more parallel browsers starve each other.
+  workers: 2,
   retries: 0,
   reporter: [['list']],
   use: {

@@ -50,12 +50,12 @@ npm run deploy
 Google Cloud Console の OAuth クライアント（ウェブアプリ）に、承認済みリダイレクト URI として
 `https://<your-domain>/api/auth/callback` を登録してください。
 
-## License
-
-MIT
-
 本番に対して E2E を流す（テスト用ログインが要るケースは除外）:
 
 ```bash
 BASE_URL=https://flick.mumumu-cpu.workers.dev npx playwright test --grep-invert "ログイン後|ログアウトで|他人のタスク"
 ```
+
+## License
+
+MIT
