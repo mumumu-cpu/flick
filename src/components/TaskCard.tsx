@@ -34,6 +34,8 @@ export const TaskCard = forwardRef<HTMLLIElement, Props>(function TaskCard({ tas
   const width = useRef(360)
   const armed = useRef<0 | 1 | -1>(0)
   const [armedSide, setArmedSide] = useState<0 | 1 | -1>(0)
+  // False only while the enter animation runs (cards mounted without one count as entered).
+  const [entered, setEntered] = useState(true)
   const dragging = useRef(false)
   const swipe = SWIPE[task.status]
   const threshold = () => Math.min(140, width.current * 0.32)
@@ -81,8 +83,11 @@ export const TaskCard = forwardRef<HTMLLIElement, Props>(function TaskCard({ tas
       exit={{ opacity: 0, scale: 0.9, height: 0, marginBottom: 0, filter: 'blur(6px)', transition: { duration: 0.28, ease: [0.32, 0.72, 0, 1] } }}
       transition={{ type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
       className="relative mb-2.5 list-none"
+      onAnimationStart={() => setEntered(false)}
+      onAnimationComplete={() => setEntered(true)}
       data-testid="task"
       data-status={task.status}
+      data-entered={entered}
     >
       <motion.div className="absolute inset-0 overflow-hidden rounded-[24px]" style={{ background: tint }} aria-hidden>
         <ActionHint action={swipe.right} side="left" progress={right} />

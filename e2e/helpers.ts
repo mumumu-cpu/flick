@@ -12,14 +12,9 @@ export async function swipe(page: Page, text: string, dx: number) {
   // Wait out tab-switch exit animations so only the live card matches.
   await expect(page.getByTestId('task').filter({ hasText: text })).toHaveCount(1)
   const card = page.getByTestId('task').filter({ hasText: text }).locator('[role=button]')
-  // Let the enter / layout animation settle so the press lands on a card that isn't still moving.
-  let b = (await card.boundingBox())!
-  for (let stable = 0; stable < 3; ) {
-    await page.waitForTimeout(60)
-    const n = (await card.boundingBox())!
-    stable = Math.abs(n.x - b.x) < 0.5 && Math.abs(n.y - b.y) < 0.5 && Math.abs(n.width - b.width) < 0.5 ? stable + 1 : 0
-    b = n
-  }
+  // WebKit ignores a drag that begins during the card's enter animation, so wait for it to finish.
+  await expect(page.getByTestId('task').filter({ hasText: text })).toHaveAttribute('data-entered', 'true')
+  const b = (await card.boundingBox())!
   const y = b.y + b.height / 2
   // Start on the side opposite the swipe so the finger stays on screen, as a real thumb would.
   const x0 = dx > 0 ? b.x + 30 : b.x + b.width - 30
