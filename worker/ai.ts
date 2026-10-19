@@ -52,7 +52,7 @@ ai.post('/split', async (c) => {
   if (c.env.AI_MOCK === '1') return c.json({ items: ['手順1: ' + text, '手順2: ' + text, '手順3: ' + text] })
   const { items } = await runJson<{ items: string[] }>(
     c.env,
-    'あなたはタスク分解アシスタントです。ユーザーのメモを、すぐ着手できる具体的なサブタスク3〜6個に分解してください。各サブタスクは簡潔な日本語(40文字以内)、動詞で終える。メモが日本語以外ならその言語で返す。JSONのみを返す。',
+    'あなたはタスク分解アシスタントです。ユーザーのメモを、すぐ着手できる具体的なサブタスク3〜6個に分解してください。各サブタスクは簡潔な日本語(40文字以内)、動詞で終える。メモにある期限・日時・場所・人名は関係するサブタスクに残す。メモが日本語以外ならその言語で返す。JSONのみを返す。',
     text,
     { type: 'object', properties: { items: { type: 'array', items: { type: 'string' } } }, required: ['items'] },
   )
@@ -67,7 +67,7 @@ ai.post('/polish', async (c) => {
   if (c.env.AI_MOCK === '1') return c.json({ text: `${text}を進める` })
   const { title } = await runJson<{ title: string }>(
     c.env,
-    'あなたはタスク整理アシスタントです。ユーザーのメモ(音声入力の誤変換やフィラーを含むことがある)を、意味を変えずに簡潔で行動可能なタスク名(60文字以内)に整えてください。メモが日本語以外ならその言語で返す。JSONのみを返す。',
+    'あなたはタスク整理アシスタントです。ユーザーのメモ(音声入力の誤変換やフィラーを含むことがある)を、フィラーや言い淀みを除き、意味を変えずに簡潔で行動可能なタスク名(60文字以内)に整えてください。期限・日時・場所・人名・数量などの情報は必ず残してください。メモが日本語以外ならその言語で返す。JSONのみを返す。',
     text,
     { type: 'object', properties: { title: { type: 'string' } }, required: ['title'] },
   )
