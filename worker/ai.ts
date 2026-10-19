@@ -26,15 +26,17 @@ async function readText(req: Request) {
   return text
 }
 
-async function runJson<T>(env: AppEnv['Bindings'], system: string, user: string, schema: object): Promise<T> {
+// gpt-oss reasons before answering, so the token budget must cover reasoning + JSON.
+async function runJson<T>(env: AppEnv['Bindings'], system: string, user: string, schema: object, effort: 'low' | 'medium' = 'low'): Promise<T> {
   const out = (await env.AI.run(env.AI_MODEL as keyof AiModels, {
     messages: [
       { role: 'system', content: system },
       { role: 'user', content: user },
     ],
     response_format: { type: 'json_schema', json_schema: schema },
-    max_tokens: 600,
+    max_tokens: 1500,
     temperature: 0.3,
+    reasoning_effort: effort,
   } as never)) as { response?: unknown; choices?: { message?: { content?: unknown } }[] }
   // Models answer either as { response } or in the OpenAI chat.completion shape.
   const r = out.response ?? out.choices?.[0]?.message?.content
@@ -44,7 +46,9 @@ async function runJson<T>(env: AppEnv['Bindings'], system: string, user: string,
   return JSON.parse(m ? m[0] : s) as T
 }
 
-const clean = (s: string) => s.replace(/^[\s\-・*•\d.)]+/, '').trim().slice(0, 200)
+// Strip list markers and any stray JSON punctuation a model leaves around the text.
+const clean = (s: string) =>
+  s.replace(/^\s*(?:[-・*•]|\d+[.)])\s*/, '').replace(/[\s'"`,]+$/, '').replace(/^['"`]+/, '').trim().slice(0, 200)
 
 ai.post('/split', async (c) => {
   const text = await readText(c.req.raw)
@@ -55,6 +59,7 @@ ai.post('/split', async (c) => {
     'あなたはタスク分解アシスタントです。ユーザーのメモを、すぐ着手できる具体的なサブタスク3〜6個に分解してください。各サブタスクは簡潔な日本語(40文字以内)、動詞で終える。メモにある期限・日時・場所・人名は関係するサブタスクに残す。メモが日本語以外ならその言語で返す。JSONのみを返す。',
     text,
     { type: 'object', properties: { items: { type: 'array', items: { type: 'string' } } }, required: ['items'] },
+    'low',
   )
   const list = (Array.isArray(items) ? items : []).map((s) => clean(String(s))).filter(Boolean).slice(0, 6)
   if (!list.length) return c.json({ error: 'ai_failed' }, 502)
@@ -70,6 +75,7 @@ ai.post('/polish', async (c) => {
     'あなたはタスク整理アシスタントです。ユーザーのメモ(音声入力の誤変換やフィラーを含むことがある)を、フィラーや言い淀みを除き、意味を変えずに簡潔で行動可能なタスク名(60文字以内)に整えてください。期限・日時・場所・人名・数量などの情報は必ず残してください。メモが日本語以外ならその言語で返す。JSONのみを返す。',
     text,
     { type: 'object', properties: { title: { type: 'string' } }, required: ['title'] },
+    'low',
   )
   const result = clean(String(title ?? ''))
   if (!result) return c.json({ error: 'ai_failed' }, 502)
